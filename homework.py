@@ -116,8 +116,7 @@ def main():
             if prev_status != status:
                 homework = homeworks[0]
                 status['output'] = homework.get('status')
-                message = (f'Статус работы изменился на'
-                           f'{HOMEWORK_VERDICTS[status["output"]]}')
+                message = parse_status(homework)
                 send_message(bot, message)
                 prev_status = status
             else:
