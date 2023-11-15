@@ -29,11 +29,11 @@ HOMEWORK_VERDICTS = {
 
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format=(
         '%(asctime)s, %(levelname)s, Функция - %(funcName)s, %(message)s'
     ),
-    handlers=[logging.StreamHandler(stream=sys.stdout)])
+    handlers=[logging.StreamHandler(sys.stdout),])
 
 
 def check_tokens():
