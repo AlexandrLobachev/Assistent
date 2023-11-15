@@ -101,24 +101,23 @@ def main():
         sys.exit('Переменные окружения не найдены')
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     timestamp = int(time.time())
-    status = {'output': ''}
+    status = 'Работа еще не взята на проверку.'
     prev_status = ''
     while True:
         try:
             response = get_api_answer(timestamp)
             homeworks = check_response(response)
             if len(homeworks) == 0 and prev_status != status:
-                status['output'] = ('Бот запущен, '
-                                    'работа еще не взята на проверку.')
-                message = f'{status["output"]}'
+                message = status
                 send_message(bot, message)
                 prev_status = status
-            if prev_status != status:
+            if len(homeworks) != 0:
                 homework = homeworks[0]
-                status['output'] = homework.get('status')
-                message = parse_status(homework)
-                send_message(bot, message)
-                prev_status = status
+                status = homework.get('status')
+                if status != prev_status:
+                    message = parse_status(homework)
+                    send_message(bot, message)
+                    prev_status = status
             else:
                 continue
         except Exception as error:
@@ -126,6 +125,39 @@ def main():
             logging.error(message)
         finally:
             time.sleep(RETRY_PERIOD)
+
+
+# def main():
+#     """Основная логика работы бота."""
+#     if not check_tokens():
+#         sys.exit('Переменные окружения не найдены')
+#     bot = telegram.Bot(token=TELEGRAM_TOKEN)
+#     timestamp = int(time.time())
+#     status = {'output': ''}
+#     prev_status = ''
+#     while True:
+#         try:
+#             response = get_api_answer(timestamp)
+#             homeworks = check_response(response)
+#             if len(homeworks) == 0 and prev_status != status:
+#                 status['output'] = ('Бот запущен, '
+#                                     'работа еще не взята на проверку.')
+#                 message = f'{status["output"]}'
+#                 send_message(bot, message)
+#                 prev_status = status
+#             if prev_status != status:
+#                 homework = homeworks[0]
+#                 status['output'] = homework.get('status')
+#                 message = parse_status(homework)
+#                 send_message(bot, message)
+#                 prev_status = status
+#             else:
+#                 continue
+#         except Exception as error:
+#             message = f'Сбой в работе программы: {error}'
+#             logging.error(message)
+#         finally:
+#             time.sleep(RETRY_PERIOD)
 
 
 if __name__ == '__main__':
