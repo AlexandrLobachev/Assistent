@@ -33,7 +33,7 @@ logging.basicConfig(
     format=(
         '%(asctime)s, %(levelname)s, Функция - %(funcName)s, %(message)s'
     ),
-    handlers=[logging.StreamHandler(sys.stdout),])
+    handlers=[logging.StreamHandler(sys.stdout), ])
 
 
 def check_tokens():
