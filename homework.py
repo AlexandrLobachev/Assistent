@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 import telegram
 from telegram.error import TelegramError
 
+from exeptions import SendMessageExeption, InvalidStatusError, GetResposneError
+
 load_dotenv()
 
 
@@ -28,22 +30,22 @@ HOMEWORK_VERDICTS = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
 
-log_format = '%(asctime)s, %(levelname)s, Функция - %(funcName)s, %(message)s'
+logging.basicConfig(
+    level=logging.DEBUG,
+    format=(
+        '%(asctime)s, %(levelname)s, Функция - %(funcName)s, %(message)s'
+    ),
+    handlers=(logging.StreamHandler(sys.stdout),))
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(logging.Formatter(log_format))
-logger.addHandler(handler)
 
 
 def check_tokens():
     """Проверяет наличие токенов и номера чата."""
-    tokens_dict = {'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
-                   'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
-                   'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID}
+    tokens_dict: dict[str, str] = {'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
+                                   'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
+                                   'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID}
     sucsess = True
-    for item in tokens_dict.items():
-        token_name, token_value = item
+    for token_name, token_value in tokens_dict.items():
         if not token_value:
             logger.critical(f'Переменная окружения {token_name} не найдена.')
             sucsess = False
@@ -54,11 +56,11 @@ def send_message(bot, message):
     """Отправлет сообщение в TG."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
-        logger.debug(f'Бот отправил сообщение: {message}')
     except TelegramError as error:
-        raise TelegramError(
+        raise SendMessageExeption(
             f'Ошибка при отправке сообщения: {error}'
-        )
+        ) from error
+    logger.debug(f'Бот отправил сообщение: {message}')
 
 
 def get_api_answer(timestamp):
@@ -67,14 +69,15 @@ def get_api_answer(timestamp):
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
     except Exception as error:
-        raise Exception(f'Ошибка при получении ответа от API: {error}'
-                        f'Параметры запроса: {HEADERS}, {payload}')
+        raise GetResposneError(f'Ошибка при получении ответа от API: {error}'
+                               f'Параметры запроса: {HEADERS}, {payload}'
+                               ) from error
     if response.status_code != HTTPStatus.OK:
-        raise Exception('Ошибка статуса ответа от API: '
-                        f'Эндпоинт {ENDPOINT}, '
-                        f'Код ответа API: {response.status_code}, '
-                        f'Параметры запроса: {HEADERS}, {payload}, '
-                        f'Ответ: {response}.')
+        raise InvalidStatusError('Ошибка статуса ответа от API: '
+                                 f'Эндпоинт {ENDPOINT}, '
+                                 f'Код ответа API: {response.status_code}, '
+                                 f'Параметры запроса: {HEADERS}, {payload}, '
+                                 f'Ответ: {response}.')
     return response.json()
 
 
@@ -106,28 +109,29 @@ def main():
         sys.exit('Переменные окружения не найдены')
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     timestamp = int(time.time())
-    list_sent_errors = []
     while True:
         try:
             api_answer = get_api_answer(timestamp)
             logger.debug('Ответ от API получен')
             timestamp = int(time.time())
             homeworks = check_response(api_answer)
-            if len(homeworks) != 0:
-                for homework in homeworks:
-                    logger.debug(
-                        f'Проверка {homeworks.index(homework) + 1} домашки'
-                    )
-                    message = parse_status(homework)
-                    send_message(bot, message)
-            logger.debug('Домашек нет, жду 10 минут')
-            continue
+            if not homeworks:
+                logger.debug('Домашек нет, жду '
+                             f'{STATUS_POLLING_PERIOD_IN_SECONDS} секунд.')
+                continue
+            for homework in homeworks:
+                logger.debug(
+                    f'Проверка {homeworks.index(homework) + 1} домашки.'
+                )
+                message = parse_status(homework)
+                send_message(bot, message)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
-            if str(error) not in list_sent_errors:
-                list_sent_errors.append(str(error))
-                send_message(bot, message)
+            errors_set = set()
+            errors_set.add(str(message))
+            errors_set_str = str(errors_set)
+            send_message(bot, errors_set_str)
         finally:
             time.sleep(STATUS_POLLING_PERIOD_IN_SECONDS)
 
