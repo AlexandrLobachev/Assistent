@@ -128,7 +128,7 @@ def main():
                 send_message(bot, message)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            logger.error(message)
+            logger.exception(message)
             if str(error) not in list_sent_errors:
                 list_sent_errors.append(str(error))
                 send_message(bot, message)
