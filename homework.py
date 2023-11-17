@@ -20,7 +20,7 @@ TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_PERIOD = 600
 STATUS_POLLING_PERIOD_IN_SECONDS = RETRY_PERIOD
-ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
+ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/111'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 
@@ -109,6 +109,7 @@ def main():
         sys.exit('Переменные окружения не найдены')
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     timestamp = int(time.time())
+    list_sent_errors = []
     while True:
         try:
             api_answer = get_api_answer(timestamp)
@@ -128,10 +129,9 @@ def main():
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
-            errors_set = set()
-            errors_set.add(str(message))
-            errors_set_str = str(errors_set)
-            send_message(bot, errors_set_str)
+            if str(error) not in list_sent_errors:
+                list_sent_errors.append(str(error))
+                send_message(bot, message)
         finally:
             time.sleep(STATUS_POLLING_PERIOD_IN_SECONDS)
 
