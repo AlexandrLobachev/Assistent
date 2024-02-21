@@ -42,10 +42,10 @@ TELEGRAM_CHAT_ID = личный id в телеграм, узнать можно 
 
 Клонируйте репозиторий и перейдите в него в командной строке::
    ```
-   git clone git@github.com:AlexandrLobachev/homework_bot.git
+   git clone git@github.com:AlexandrLobachev/Assistent.git
    ```
    ```
-   cd homework_bot
+   cd Assistent
    ```
 Создайте и активируйте виртуальное окружение:
   ```
