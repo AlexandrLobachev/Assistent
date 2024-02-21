@@ -18,9 +18,7 @@
 <br>
 
 ## Технологии используемые в проекте:
-- [Python 3.11](https://docs.python.org/release/3.11.5/)
-- [Python Telegram Bot 13.7](https://docs.python-telegram-bot.org/en/v13.7/index.html)
-- [Pytest 6.2.5](https://docs.pytest.org/en/6.2.x/)
+Python 3.11, Python Telegram Bot 13.7, Pytest 6.2.5
 
 <br>
 
