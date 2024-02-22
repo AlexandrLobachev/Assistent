@@ -1,4 +1,4 @@
-# Проект "Assistent"
+# Проект "Bot Assistent"
 Проект является учебным. Цель проекта, закрепление теоритечиских знаний по написанию телеграмм бота:
 - библиотеки `Python Telegram Bot` для написания структуры бота;
 - `.env` для инкапсулирования обязательных переменных окружения и парсинга их через `load_dotenv()`;
@@ -37,10 +37,10 @@ TELEGRAM_CHAT_ID = личный id в телеграм, узнать можно 
 
 - Клонируйте репозиторий и перейдите в него в командной строке::
    ```
-   git clone git@github.com:AlexandrLobachev/Assistent.git
+   git clone git@github.com:AlexandrLobachev/Bot_Assistent.git
    ```
    ```
-   cd Assistent
+   cd Bot_Assistent
    ```
 - Создайте и активируйте виртуальное окружение:
   ```
